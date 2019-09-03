@@ -11,20 +11,20 @@ import (
 )
 
 func main() { //see python script for comments. Everything is the same but modified to work with Golang
-	uid := call1()
-	referral := call2(uid)
-	call3(referral)
+	uid := getFormUID()
+	referral := getReferralCode(uid)
+	getMeterID(referral)
 	time.Sleep(30 * time.Second)
-	meterid := call3(referral)
+	meterid := getMeterID(referral)
 	fmt.Println("Meter ID: ", meterid)
-	call4(meterid)
-	call5(meterid)
+	activateMeter(meterid)
+	getMeterStatus(meterid)
 	time.Sleep(60 * time.Second)
-	call5(meterid)
-	call6(meterid)
+	getMeterStatus(meterid)
+	getBill(meterid)
 
 }
-func call1() string {
+func getFormUID() string {
 	var url = "https://utilityapi.com/api/v2/forms"
 	fmt.Println(url)
 	client := &http.Client{}
@@ -50,7 +50,7 @@ func call1() string {
 	fmt.Println("Form UID: ", jsonRes["uid"])
 	return fmt.Sprintf("%v", jsonRes["uid"])
 }
-func call2(uid string) string {
+func getReferralCode(uid string) string {
 	var url = "https://utilityapi.com/api/v2/forms/" + uid + "/test-submit"
 	fmt.Println(url)
 	payload, err := json.Marshal(map[string]string{
@@ -83,7 +83,7 @@ func call2(uid string) string {
 	fmt.Println("Referral: ", jsonRes["referral"])
 	return fmt.Sprintf("%v", jsonRes["referral"])
 }
-func call3(referral string) string {
+func getMeterID(referral string) string {
 	var url = "https://utilityapi.com/api/v2/authorizations?referrals=" + referral + "&include=meters"
 	fmt.Println(url)
 	client := &http.Client{}
@@ -114,7 +114,7 @@ func call3(referral string) string {
 	id := retStr[4:i2]
 	return id
 }
-func call4(meterid string) string {
+func activateMeter(meterid string) string {
 	var url = "https://utilityapi.com/api/v2/meters/historical-collection"
 	fmt.Println(url)
 	list := [1]string{
@@ -149,7 +149,7 @@ func call4(meterid string) string {
 	fmt.Println("Meter activated?: ", jsonRes["success"])
 	return fmt.Sprintf("%v", jsonRes)
 }
-func call5(meterid string) string {
+func getMeterStatus(meterid string) string {
 	var url = "https://utilityapi.com/api/v2/meters/" + meterid
 	fmt.Println(url)
 	client := &http.Client{}
@@ -175,7 +175,7 @@ func call5(meterid string) string {
 	fmt.Println("Meter status: ", jsonRes["status"])
 	return fmt.Sprintf("%v", jsonRes["status"])
 }
-func call6(meterid string) string {
+func getBill(meterid string) string {
 	var url = "https://utilityapi.com/api/v2/bills?meters=" + meterid
 	fmt.Println(url)
 	client := &http.Client{}
